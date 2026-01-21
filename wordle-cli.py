@@ -20,9 +20,24 @@ class Wordle:
         self.letter_status = defaultdict(lambda: "gray")
         self.play()
 
+    @staticmethod
+    def line_break(position):
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                if position in ("top", "both"):
+                    print()
+                result = func(*args, **kwargs)
+                if position in ("bottom", "both"):
+                    print()
+                return result
+            return wrapper
+        return decorator
+    
+    @line_break("top")
     def welcome(self):
         print("Welcome to CLI Wordle")
 
+    @line_break("both")
     def get_answer(self):
         while True:
             word = input(f"Enter a {self.WORD_LENGTH} letter word")
@@ -31,7 +46,8 @@ class Wordle:
                 break
             else:
                 print(f"Word must be {self.WORD_LENGTH} letters. No numbers or symbols")
-
+    
+    @line_break("top")
     def display_history(self):
         for guess, result in self.history:
             colored_guess = ""
@@ -50,6 +66,7 @@ class Wordle:
                 if self.letter_status[char] not in ("green", "yellow"):
                     self.letter_status[char] = "red"
 
+    @line_break("both")
     def display_keyboard(self):
         for row in self.KEYBOARD:
             display_row = ""
