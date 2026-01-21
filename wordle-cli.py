@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 
 class Wordle:
     WORD_LENGTH = 5
@@ -33,22 +34,40 @@ class Wordle:
             return wrapper
         return decorator
     
+    @staticmethod
+    def clear(order):
+        def decorator(func):
+            def wrapper(*args, **kwargs):
+                if order in ("before", "both"):
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                result = func(*args, **kwargs)
+                if order in ("after", "both"):
+                    os.system('cls' if os.name == 'nt' else 'clear')
+                return result
+            return wrapper
+        return decorator
+
+
     @line_break("top")
     def welcome(self):
         print("Welcome to CLI Wordle")
 
     @line_break("both")
+    @clear("after")
     def get_answer(self):
         while True:
-            word = input(f"Enter a {self.WORD_LENGTH} letter word")
+            word = input(f"Enter a {self.WORD_LENGTH} letter word\t")
             if len(word) == self.WORD_LENGTH and word.isalpha():
                 self.answer = word.lower()
+                os.system('cls' if os.name == 'nt' else 'clear')
                 break
             else:
                 print(f"Word must be {self.WORD_LENGTH} letters. No numbers or symbols")
     
     @line_break("top")
+    @clear("before")
     def display_history(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
         for guess, result in self.history:
             colored_guess = ""
             for char, state in zip(guess, result):
@@ -79,14 +98,14 @@ class Wordle:
         tries = 1
         win = False
         while tries <= self.MAX_TRIES:
-            guess = input(f"Guess {tries}/{self.MAX_TRIES}").lower()
+            guess = input(f"Guess {tries}/{self.MAX_TRIES}\t").lower()
             if len(guess) != self.WORD_LENGTH or not guess.isalpha():
                 print(f"Guess must be {self.WORD_LENGTH} letters. No numbers or symbols")
                 continue
             
             win = self.evaluate(guess)
             if win:
-                print(f"Congrats! You guessed the word in {tries} tries.")
+                print(f"Congrats! You guessed the word in {tries} tries.\n")
                 break
 
             tries += 1
