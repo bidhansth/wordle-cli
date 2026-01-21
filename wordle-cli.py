@@ -45,7 +45,6 @@ class Wordle:
             return wrapper
         return decorator
 
-
     @clear("before")
     @line_break("top")
     def welcome(self):
@@ -67,13 +66,13 @@ Please choose a mode:
     def get_word_from_api(self):
         try:
             self.answer = get_todays_word().lower()
+            print("Today's word fetched.\n")
         except (ConnectionError, ValueError) as e:
             print(f"""Could not fetch the word from NY Times Server.
 Please try again or choose Friend mode.\n
 Error: {e}""")
             self.welcome()
         
-
     @line_break("both")
     @clear("after")
     def get_answer(self):
@@ -81,7 +80,6 @@ Error: {e}""")
             word = input(f"Enter a {self.WORD_LENGTH} letter word\t")
             if len(word) == self.WORD_LENGTH and word.isalpha():
                 self.answer = word.lower()
-                os.system('cls' if os.name == 'nt' else 'clear')
                 break
             else:
                 print(f"Word must be {self.WORD_LENGTH} letters. No numbers or symbols")
@@ -89,7 +87,6 @@ Error: {e}""")
     @line_break("top")
     @clear("before")
     def display_history(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
         for guess, result in self.history:
             colored_guess = ""
             for char, state in zip(guess, result):
@@ -145,7 +142,6 @@ The word was {self.answer}""")
         if input("Would you like to play again? (y/n):\t").lower() == "y":
             self.welcome()
             self.play()
-
 
     def evaluate(self, guess: str) -> bool:
         result = [""] * self.WORD_LENGTH #to track user's guesses letters as green/yellow
