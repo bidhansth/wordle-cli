@@ -1,6 +1,6 @@
 from collections import defaultdict
 import os
-from wordle_api import get_todays_word
+from word_apis import get_word_from_api
 
 class Wordle:
     WORD_LENGTH = 5
@@ -50,27 +50,29 @@ class Wordle:
     def welcome(self):
         print("""Welcome to CLI Wordle\n
 Please choose a mode:
-1. Online Mode (Word fetched from NY Times)
-2. Friend Mode (Word input by your friend)\n""")
+1. Official Wordle Mode (Word fetched from NY Times)
+2. Random Word Mode (Word fetched from Random Word API)
+3. Friend Mode (Word input by your friend)\n""")
         while True:
             choice = int(input("Enter your choice (1/2):\t"))
-            if choice == 1:
-                self.get_word_from_api()
+            if choice in (1,2):
+                self.call_api(choice)
                 break
-            elif choice == 2:
+            elif choice == 3:
                 self.get_answer()
                 break
             else:
                 print("Invalid choice.\n")
 
-    def get_word_from_api(self):
+    def call_api(self, choice: int):
         try:
-            self.answer = get_todays_word().lower()
-            print("Today's word fetched.\n")
+            self.answer = get_word_from_api(choice).lower()
+            print("Word fetched.\n")
         except (ConnectionError, ValueError) as e:
-            print(f"""Could not fetch the word from NY Times Server.
+            print(f"""Could not fetch the word from API.
 Please try again or choose Friend mode.\n
 Error: {e}""")
+            input("\nPress Enter to continue")
             self.welcome()
         
     @line_break("both")

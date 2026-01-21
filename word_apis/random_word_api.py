@@ -1,22 +1,17 @@
 import requests
-from datetime import datetime
-from typing import Optional
 
-class WordleAPI:
-    BASE_URL = "https://www.nytimes.com/svc/wordle/v2"
+class RandomWordAPI:
+    WORD_LENGTH = 5
+    BASE_URL = "https://random-word-api.herokuapp.com/word"
     
     @classmethod
-    def get_todays_word(cls) -> str:
-        today = datetime.now().strftime("%Y-%m-%d")
-
-        url = f"{cls.BASE_URL}/{today}.json"
+    def get_random_word(cls) -> str:
+        url = f"{cls.BASE_URL}?length={cls.WORD_LENGTH}"
         
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
-            data = response.json()
-            
-            word = data.get('solution')
+            word = response.json()[0]
             if not word:
                 raise ValueError("API response does not contain a valid word")
             
@@ -29,5 +24,5 @@ class WordleAPI:
         except (KeyError, ValueError) as e:
             raise ValueError(f"Invalid API response format: {e}")
 
-def get_todays_word() -> str:
-    return WordleAPI.get_todays_word()
+def get_random_word() -> str:
+    return RandomWordAPI.get_random_word()
