@@ -1,5 +1,6 @@
 from collections import defaultdict
 import os
+from wordle_api import get_todays_word
 
 class Wordle:
     WORD_LENGTH = 5
@@ -16,9 +17,6 @@ class Wordle:
 
     def __init__(self):
         self.welcome()
-        self.get_answer()
-        self.history = []
-        self.letter_status = defaultdict(lambda: "gray")
         self.play()
 
     @staticmethod
@@ -48,9 +46,33 @@ class Wordle:
         return decorator
 
 
+    @clear("before")
     @line_break("top")
     def welcome(self):
-        print("Welcome to CLI Wordle")
+        print("""Welcome to CLI Wordle\n
+Please choose a mode:
+1. Online Mode (Word fetched from NY Times)
+2. Friend Mode (Word input by your friend)\n""")
+        while True:
+            choice = int(input("Enter your choice (1/2):\t"))
+            if choice == 1:
+                self.get_word_from_api()
+                break
+            elif choice == 2:
+                self.get_answer()
+                break
+            else:
+                print("Invalid choice.\n")
+
+    def get_word_from_api(self):
+        try:
+            self.answer = get_todays_word().lower()
+        except (ConnectionError, ValueError) as e:
+            print(f"""Could not fetch the word from NY Times Server.
+Please try again or choose Friend mode.\n
+Error: {e}""")
+            self.welcome()
+        
 
     @line_break("both")
     @clear("after")
@@ -95,14 +117,17 @@ class Wordle:
             print(display_row)
 
     def play(self):
+        self.history = []
+        self.letter_status = defaultdict(lambda: "gray")
         tries = 1
         win = False
+
         while tries <= self.MAX_TRIES:
             guess = input(f"Guess {tries}/{self.MAX_TRIES}\t").lower()
             if len(guess) != self.WORD_LENGTH or not guess.isalpha():
                 print(f"Guess must be {self.WORD_LENGTH} letters. No numbers or symbols")
                 continue
-            
+
             win = self.evaluate(guess)
             if win:
                 print(f"Congrats! You guessed the word in {tries} tries.\n")
@@ -113,6 +138,14 @@ class Wordle:
         if not win:
             print(f"""Sorry, you're out of tries.
 The word was {self.answer}""")
+            
+        self.rerun()
+            
+    def rerun(self):
+        if input("Would you like to play again? (y/n):\t").lower() == "y":
+            self.welcome()
+            self.play()
+
 
     def evaluate(self, guess: str) -> bool:
         result = [""] * self.WORD_LENGTH #to track user's guesses letters as green/yellow
