@@ -2,6 +2,12 @@ class Wordle:
     WORD_LENGTH = 5
     MAX_TRIES = 6
 
+    COLORS = {
+        'green': '\033[92m',
+        'yellow': '\033[93m',
+        'reset': '\033[0m'
+    }
+
     def __init__(self):
         self.welcome()
         self.get_answer()
@@ -19,6 +25,13 @@ class Wordle:
                 break
             else:
                 print(f"Word must be {self.WORD_LENGTH} letters. No numbers or symbols")
+
+    def display_history(self):
+        for guess, result in self.history:
+            colored_guess = ""
+            for char, state in zip(guess, result):
+                colored_guess += f"{self.COLORS[state]}{char.upper()}{self.COLORS['reset']} "
+            print(colored_guess)
 
     def play(self):
         tries = 1
@@ -59,6 +72,7 @@ The word was {self.answer}""")
                     result[i] = "gray"
         
         self.history.append((guess, result))
+        self.display_history()
         if guess == self.answer:
             return True
             
