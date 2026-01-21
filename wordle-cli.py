@@ -1,17 +1,23 @@
+from collections import defaultdict
+
 class Wordle:
     WORD_LENGTH = 5
     MAX_TRIES = 6
-
     COLORS = {
         'green': '\033[92m',
         'yellow': '\033[93m',
+        'gray': '\033[90m',
+        'red': '\033[91m',
+        'white': '\033[97m',
         'reset': '\033[0m'
     }
+    KEYBOARD = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM']
 
     def __init__(self):
         self.welcome()
         self.get_answer()
         self.history = []
+        self.letter_status = defaultdict(lambda: "gray")
         self.play()
 
     def welcome(self):
@@ -32,6 +38,25 @@ class Wordle:
             for char, state in zip(guess, result):
                 colored_guess += f"{self.COLORS[state]}{char.upper()}{self.COLORS['reset']} "
             print(colored_guess)
+
+    def update_keyboard(self, guess, result):
+        for char, state in zip(guess, result):
+            if state == "green":
+                self.letter_status[char] = state
+            elif state == "yellow":
+                if self.letter_status[char] != "green":
+                    self.letter_status[char] = state
+            elif state == "white":
+                if self.letter_status[char] not in ("green", "yellow"):
+                    self.letter_status[char] = "red"
+
+    def display_keyboard(self):
+        for row in self.KEYBOARD:
+            display_row = ""
+            for letter in row:
+                color = self.COLORS[self.letter_status[letter.lower()]]
+                display_row += f"{color}{letter}{self.COLORS['reset']} "
+            print(display_row)
 
     def play(self):
         tries = 1
@@ -69,10 +94,12 @@ The word was {self.answer}""")
                     remaining_letters[remaining_letters.index(guess[i])] = None
                     #letter must be removed from remaining letters to avoid duplicate yellow letters
                 else:
-                    result[i] = "gray"
+                    result[i] = "white"
         
         self.history.append((guess, result))
         self.display_history()
+        self.update_keyboard(guess, result)
+        self.display_keyboard()
         if guess == self.answer:
             return True
             
