@@ -22,19 +22,25 @@ class Wordle:
 
     def play(self):
         tries = 1
+        win = False
         while tries <= self.MAX_TRIES:
             guess = input(f"Guess {tries}/{self.MAX_TRIES}").lower()
             if len(guess) != self.WORD_LENGTH or not guess.isalpha():
                 print(f"Guess must be {self.WORD_LENGTH} letters. No numbers or symbols")
                 continue
+            
+            win = self.evaluate(guess)
+            if win:
+                print(f"Congrats! You guessed the word in {tries} tries.")
+                break
 
             tries += 1
-            self.evaluate(guess)
         
-        print(f"""Sorry, you're out of tries.
+        if not win:
+            print(f"""Sorry, you're out of tries.
 The word was {self.answer}""")
 
-    def evaluate(self, guess: str):
+    def evaluate(self, guess: str) -> bool:
         result = [""] * self.WORD_LENGTH #to track user's guesses letters as green/yellow
         remaining_letters = list(self.answer) #to store which letters to check
 
@@ -54,7 +60,7 @@ The word was {self.answer}""")
         
         self.history.append((guess, result))
         if guess == self.answer:
-            print("Congrats! You guessed the word.")
+            return True
             
 if __name__ == "__main__":
     Wordle()
